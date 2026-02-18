@@ -40,6 +40,9 @@ export async function renderDashboard() {
           <div class="project-list" id="project-list">
             <p class="loading-text">Loading projects...</p>
           </div>
+          <button class="btn-manage-projects" data-link="/projects">
+            Manage Projects →
+          </button>
         </div>
 
         <div class="dashboard-card full-width">

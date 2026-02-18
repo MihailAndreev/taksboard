@@ -13,7 +13,11 @@ router.addRoute('/dashboard', () => import('./pages/dashboard/dashboard.js').the
 // Route definitions for auth pages
 router.addRoute('/login', () => import('./pages/login/login.js').then(m => m.renderLogin()));
 router.addRoute('/register', () => import('./pages/register/register.js').then(m => m.renderRegister()));
-router.addRoute('/projects', () => Promise.resolve('<h1>Projects Page</h1>'));
+
+// Project routes
+router.addRoute('/projects', () => import('./pages/projects/projects.js').then(m => m.renderProjects()));
+router.addRoute('/projects/add', () => import('./pages/projects/projects-add.js').then(m => m.renderProjectsAdd()));
+router.addRoute('/projects/edit/:id', (params) => import('./pages/projects/projects-edit.js').then(m => m.renderProjectsEdit(params)));
 router.addRoute('/projects/:id', (params) => Promise.resolve(`
   <div class="page-container">
     <h1>Project Details</h1>
