@@ -40,10 +40,14 @@ export class Router {
   setupLinkHandlers() {
     this.contentElement.removeEventListener('click', this.linkClickHandler);
     this.linkClickHandler = (e) => {
-      if (e.target.hasAttribute('data-link')) {
+      // Find the closest element with data-link attribute (handles nested elements)
+      const linkElement = e.target.closest('[data-link]');
+      if (linkElement) {
         e.preventDefault();
-        const path = e.target.getAttribute('data-link');
-        this.go(path);
+        const path = linkElement.getAttribute('href') || linkElement.getAttribute('data-link');
+        if (path) {
+          this.go(path);
+        }
       }
     };
     this.contentElement.addEventListener('click', this.linkClickHandler);

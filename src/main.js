@@ -14,6 +14,14 @@ router.addRoute('/dashboard', () => import('./pages/dashboard/dashboard.js').the
 router.addRoute('/login', () => import('./pages/login/login.js').then(m => m.renderLogin()));
 router.addRoute('/register', () => import('./pages/register/register.js').then(m => m.renderRegister()));
 router.addRoute('/projects', () => Promise.resolve('<h1>Projects Page</h1>'));
+router.addRoute('/projects/:id', (params) => Promise.resolve(`
+  <div class="page-container">
+    <h1>Project Details</h1>
+    <p>Project ID: ${params.id}</p>
+    <p>This page will show project details and tasks.</p>
+    <a href="/dashboard" data-link>← Back to Dashboard</a>
+  </div>
+`));
 router.addRoute('/projects/:id/tasks', (params) => Promise.resolve(`<h1>Tasks for Project ${params.id}</h1>`));
 
 // Expose router globally for navigation
