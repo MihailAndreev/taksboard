@@ -1,12 +1,14 @@
 import './dashboard.css';
+import { supabase } from '../../lib/supabaseClient.js';
 
 export async function renderDashboard() {
-  return `
-    <div class="page-container dashboard-page">
-      <div class="dashboard-header">
-        <h1>Dashboard</h1>
-        <p>Welcome back! Here's your task overview.</p>
-      </div>
+  return {
+    html: `
+      <div class="page-container dashboard-page">
+        <div class="dashboard-header">
+          <h1>Dashboard</h1>
+          <p id="dashboard-user">Welcome back! Here's your task overview.</p>
+        </div>
 
       <div class="dashboard-grid">
         <div class="dashboard-card">
@@ -74,5 +76,23 @@ export async function renderDashboard() {
         </div>
       </div>
     </div>
-  `;
+    `,
+    onMount: async () => {
+      const { data } = await supabase.auth.getUser();
+      const user = data?.user;
+
+      if (!user) {
+        if (window.appRouter) {
+          window.appRouter.go('/login');
+        }
+        return;
+      }
+
+      const label = user.user_metadata?.full_name || user.email || 'there';
+      const userLine = document.getElementById('dashboard-user');
+      if (userLine) {
+        userLine.textContent = `Welcome back, ${label}! Here's your task overview.`;
+      }
+    }
+  };
 }

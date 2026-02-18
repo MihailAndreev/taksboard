@@ -66,12 +66,23 @@ export class Router {
 
       // Call route handler
       const content = await match.route.handler(match.params);
+      let html = content;
+      let onMount;
+
+      if (content && typeof content === 'object' && 'html' in content) {
+        html = content.html;
+        onMount = content.onMount;
+      }
 
       // Update DOM
-      this.contentElement.innerHTML = content;
+      this.contentElement.innerHTML = html || '';
 
       // Setup link handlers for new content
       this.setupLinkHandlers();
+
+      if (typeof onMount === 'function') {
+        onMount();
+      }
 
       // Scroll to top
       window.scrollTo(0, 0);

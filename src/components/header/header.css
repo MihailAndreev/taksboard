@@ -30,6 +30,7 @@ header {
   gap: 2rem;
   margin: 0;
   padding: 0;
+  align-items: center;
 }
 
 .navbar a {
@@ -44,6 +45,41 @@ header {
 .navbar a:hover {
   color: #3498db;
   border-bottom-color: #3498db;
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ecf0f1;
+  font-size: 0.9rem;
+}
+
+.user-label {
+  opacity: 0.7;
+}
+
+.user-pill {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  font-weight: 600;
+}
+
+.logout-button {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.85);
 }
 
 @media (max-width: 768px) {

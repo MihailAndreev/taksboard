@@ -1,6 +1,7 @@
 import { Router } from './router.js';
 import { renderHeader } from './components/header/header.js';
 import { renderFooter } from './components/footer/footer.js';
+import { supabase } from './lib/supabaseClient.js';
 
 // Initialize router
 const router = new Router();
@@ -9,9 +10,9 @@ const router = new Router();
 router.addRoute('/', () => import('./pages/index/index.js').then(m => m.renderIndex()));
 router.addRoute('/dashboard', () => import('./pages/dashboard/dashboard.js').then(m => m.renderDashboard()));
 
-// Route definitions for future pages (not yet created)
-router.addRoute('/login', () => Promise.resolve('<h1>Login Page</h1>'));
-router.addRoute('/register', () => Promise.resolve('<h1>Register Page</h1>'));
+// Route definitions for auth pages
+router.addRoute('/login', () => import('./pages/login/login.js').then(m => m.renderLogin()));
+router.addRoute('/register', () => import('./pages/register/register.js').then(m => m.renderRegister()));
 router.addRoute('/projects', () => Promise.resolve('<h1>Projects Page</h1>'));
 router.addRoute('/projects/:id/tasks', (params) => Promise.resolve(`<h1>Tasks for Project ${params.id}</h1>`));
 
@@ -19,11 +20,21 @@ router.addRoute('/projects/:id/tasks', (params) => Promise.resolve(`<h1>Tasks fo
 window.appRouter = router;
 
 // Render static components
-renderHeader();
 renderFooter();
 
-// Initialize router
-router.init();
+const initializeApp = async () => {
+  const { data } = await supabase.auth.getSession();
+  renderHeader(data?.session?.user ?? null);
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    renderHeader(session?.user ?? null);
+  });
+
+  // Initialize router
+  router.init();
+};
+
+initializeApp();
 
 // Listen for browser back/forward buttons
 window.addEventListener('popstate', () => {
