@@ -106,8 +106,8 @@ async function loadProjectsList() {
           <td class="project-description">${escapeHtml(description)}</td>
           <td class="project-date">${createdDate}</td>
           <td class="project-actions">
-            <button class="btn-icon-action btn-view" data-link="/projects/${project.id}" title="View">
-              <span>👁️</span>
+            <button class="btn-icon-action btn-view" data-link="/projects/${project.id}/tasks" title="View Tasks">
+              <span>📋</span>
             </button>
             <button class="btn-icon-action btn-edit" data-link="/projects/edit/${project.id}" title="Edit">
               <span>✏️</span>

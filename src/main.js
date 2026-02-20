@@ -20,15 +20,15 @@ router.addRoute('/register', () => import('./pages/register/register.js').then(m
 router.addRoute('/projects', () => import('./pages/projects/projects.js').then(m => m.renderProjects()));
 router.addRoute('/projects/add', () => import('./pages/projects/projects-add.js').then(m => m.renderProjectsAdd()));
 router.addRoute('/projects/edit/:id', (params) => import('./pages/projects/projects-edit.js').then(m => m.renderProjectsEdit(params)));
+router.addRoute('/projects/:id/tasks', (params) => import('./pages/projects-id-tasks/projects-id-tasks.js').then(m => m.renderProjectTasks(params)));
 router.addRoute('/projects/:id', (params) => Promise.resolve(`
   <div class="page-container">
     <h1>Project Details</h1>
     <p>Project ID: ${params.id}</p>
     <p>This page will show project details and tasks.</p>
-    <a href="/dashboard" data-link>← Back to Dashboard</a>
+    <a href="/projects" data-link>← Back to Projects</a>
   </div>
 `));
-router.addRoute('/projects/:id/tasks', (params) => Promise.resolve(`<h1>Tasks for Project ${params.id}</h1>`));
 
 // Expose router and toast globally for navigation and notifications
 window.appRouter = router;
