@@ -1,6 +1,19 @@
 import './projects-id-tasks.css';
 import { supabase } from '../../lib/supabaseClient.js';
 
+let currentProjectId = null;
+let currentStages = [];
+let currentTasks = [];
+let stageTaskCounts = {};
+let boardClickHandler = null;
+let modalInitialized = false;
+let taskModalState = {
+  mode: 'add',
+  taskId: null,
+  stageId: null
+};
+let deleteTaskId = null;
+
 export async function renderProjectTasks(params) {
   return {
     html: `
@@ -23,6 +36,43 @@ export async function renderProjectTasks(params) {
           <div class="kanban-board-container">
             <div id="kanban-board" class="kanban-board">
               <!-- Stages and tasks will be dynamically inserted here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Add/Edit Modal -->
+        <div id="task-modal" class="modal">
+          <div class="modal-content">
+            <h2 id="task-modal-title">Create Task</h2>
+            <form id="task-form" class="task-form">
+              <div class="form-group">
+                <label for="task-title">Title *</label>
+                <input type="text" id="task-title" name="title" required maxlength="100" />
+              </div>
+              <div class="form-group">
+                <label for="task-description">Description</label>
+                <textarea id="task-description" name="description" rows="4"></textarea>
+              </div>
+              <label class="checkbox-row">
+                <input type="checkbox" id="task-done" />
+                Mark as done
+              </label>
+            </form>
+            <div class="modal-actions">
+              <button id="task-cancel" class="btn-secondary" type="button">Cancel</button>
+              <button id="task-save" class="btn-primary" type="button">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="task-delete-modal" class="modal">
+          <div class="modal-content">
+            <h2>Delete Task</h2>
+            <p id="task-delete-message">Are you sure you want to delete this task?</p>
+            <div class="modal-actions">
+              <button id="task-delete-cancel" class="btn-secondary" type="button">Cancel</button>
+              <button id="task-delete-confirm" class="btn-danger" type="button">Delete</button>
             </div>
           </div>
         </div>
@@ -52,6 +102,7 @@ export async function renderProjectTasks(params) {
 
       // Load project and tasks
       const projectId = params.id;
+      currentProjectId = projectId;
       await loadProjectTasks(projectId);
     }
   };
@@ -102,8 +153,13 @@ async function loadProjectTasks(projectId) {
       descriptionEl.style.display = 'none';
     }
 
+    currentStages = stages || [];
+    currentTasks = tasks || [];
+
     // Render kanban board
-    renderKanbanBoard(stages || [], tasks || []);
+    renderKanbanBoard(currentStages, currentTasks);
+    setupBoardInteractions();
+    ensureModalHandlers();
 
     // Show content
     loadingEl.style.display = 'none';
@@ -142,6 +198,11 @@ function renderKanbanBoard(stages, tasks) {
     if (tasksByStage[task.stage_id]) {
       tasksByStage[task.stage_id].push(task);
     }
+  });
+
+  stageTaskCounts = {};
+  stages.forEach(stage => {
+    stageTaskCounts[stage.id] = tasksByStage[stage.id]?.length || 0;
   });
 
   // Build HTML for each stage column
@@ -183,18 +244,265 @@ function renderKanbanBoard(stages, tasks) {
               ${doneIndicator}
             </div>
             ${descriptionPreview ? `<p class="task-description">${escapeHtml(descriptionPreview)}${descriptionPreview.length >= 100 ? '...' : ''}</p>` : ''}
+            <div class="task-card-actions">
+              <button class="task-action-btn task-action-edit" data-task-id="${task.id}" title="Edit">
+                ✏️
+              </button>
+              <button class="task-action-btn task-action-delete" data-task-id="${task.id}" title="Delete">
+                🗑️
+              </button>
+            </div>
           </div>
         `;
       });
     }
 
     boardHTML += `
+          <button class="create-task-btn" data-stage-id="${stage.id}">
+            + Create New Task
+          </button>
         </div>
       </div>
     `;
   });
 
   boardEl.innerHTML = boardHTML;
+}
+
+function setupBoardInteractions() {
+  const boardEl = document.getElementById('kanban-board');
+  if (!boardEl) return;
+
+  if (boardClickHandler) {
+    boardEl.removeEventListener('click', boardClickHandler);
+  }
+
+  boardClickHandler = (e) => {
+    const createButton = e.target.closest('.create-task-btn');
+    if (createButton) {
+      const stageId = createButton.getAttribute('data-stage-id');
+      showTaskModal({ mode: 'add', stageId });
+      return;
+    }
+
+    const editButton = e.target.closest('.task-action-edit');
+    if (editButton) {
+      e.stopPropagation();
+      const taskId = editButton.getAttribute('data-task-id');
+      const task = getTaskById(taskId);
+      if (task) {
+        showTaskModal({ mode: 'edit', stageId: task.stage_id, task });
+      }
+      return;
+    }
+
+    const deleteButton = e.target.closest('.task-action-delete');
+    if (deleteButton) {
+      e.stopPropagation();
+      const taskId = deleteButton.getAttribute('data-task-id');
+      const task = getTaskById(taskId);
+      if (task) {
+        showDeleteModal(task);
+      }
+      return;
+    }
+
+    const card = e.target.closest('.task-card');
+    if (card) {
+      const taskId = card.getAttribute('data-task-id');
+      const task = getTaskById(taskId);
+      if (task) {
+        showTaskModal({ mode: 'edit', stageId: task.stage_id, task });
+      }
+    }
+  };
+
+  boardEl.addEventListener('click', boardClickHandler);
+}
+
+function ensureModalHandlers() {
+  if (modalInitialized) return;
+
+  const taskModal = document.getElementById('task-modal');
+  const taskCancel = document.getElementById('task-cancel');
+  const taskSave = document.getElementById('task-save');
+  const deleteModal = document.getElementById('task-delete-modal');
+  const deleteCancel = document.getElementById('task-delete-cancel');
+  const deleteConfirm = document.getElementById('task-delete-confirm');
+
+  if (!taskModal || !taskCancel || !taskSave || !deleteModal || !deleteCancel || !deleteConfirm) {
+    console.error('Modal elements not found in DOM');
+    return;
+  }
+
+  modalInitialized = true;
+
+  taskCancel.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideTaskModal();
+  });
+  
+  taskSave.addEventListener('click', (e) => {
+    e.preventDefault();
+    handleTaskSave();
+  });
+
+  taskModal.addEventListener('click', (e) => {
+    if (e.target === taskModal) hideTaskModal();
+  });
+
+  deleteCancel.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideDeleteModal();
+  });
+  
+  deleteConfirm.addEventListener('click', (e) => {
+    e.preventDefault();
+    handleTaskDelete();
+  });
+
+  deleteModal.addEventListener('click', (e) => {
+    if (e.target === deleteModal) hideDeleteModal();
+  });
+}
+
+function showTaskModal({ mode, stageId, task }) {
+  const modal = document.getElementById('task-modal');
+  const modalTitle = document.getElementById('task-modal-title');
+  const titleInput = document.getElementById('task-title');
+  const descriptionInput = document.getElementById('task-description');
+  const doneInput = document.getElementById('task-done');
+
+  taskModalState = {
+    mode,
+    taskId: task?.id || null,
+    stageId: stageId || task?.stage_id || null
+  };
+
+  modalTitle.textContent = mode === 'edit' ? 'Edit Task' : 'Create Task';
+  titleInput.value = task?.title || '';
+  descriptionInput.value = task?.description_html ? stripHtml(task.description_html) : '';
+  doneInput.checked = task?.done || false;
+
+  modal.classList.add('show');
+  titleInput.focus();
+}
+
+function hideTaskModal() {
+  const modal = document.getElementById('task-modal');
+  modal.classList.remove('show');
+}
+
+function showDeleteModal(task) {
+  const modal = document.getElementById('task-delete-modal');
+  const message = document.getElementById('task-delete-message');
+  deleteTaskId = task.id;
+  message.textContent = `Are you sure you want to delete "${task.title}"? This action cannot be undone.`;
+  modal.classList.add('show');
+}
+
+function hideDeleteModal() {
+  const modal = document.getElementById('task-delete-modal');
+  modal.classList.remove('show');
+  deleteTaskId = null;
+}
+
+async function handleTaskSave() {
+  const titleInput = document.getElementById('task-title');
+  const descriptionInput = document.getElementById('task-description');
+  const doneInput = document.getElementById('task-done');
+  const saveButton = document.getElementById('task-save');
+
+  const title = titleInput.value.trim();
+  const descriptionText = descriptionInput.value.trim();
+  const done = doneInput.checked;
+
+  if (!title) {
+    if (window.toast) window.toast.error('Title is required');
+    titleInput.focus();
+    return;
+  }
+
+  try {
+    saveButton.disabled = true;
+    saveButton.textContent = taskModalState.mode === 'edit' ? 'Saving...' : 'Creating...';
+
+    const descriptionHtml = descriptionText ? buildDescriptionHtml(descriptionText) : null;
+
+    if (taskModalState.mode === 'edit' && taskModalState.taskId) {
+      const { error } = await supabase
+        .from('tasks')
+        .update({
+          title,
+          description_html: descriptionHtml,
+          done
+        })
+        .eq('id', taskModalState.taskId);
+
+      if (error) throw error;
+    } else {
+      const orderPosition = stageTaskCounts[taskModalState.stageId] || 0;
+      const { error } = await supabase
+        .from('tasks')
+        .insert({
+          project_id: currentProjectId,
+          stage_id: taskModalState.stageId,
+          title,
+          description_html: descriptionHtml,
+          order_position: orderPosition,
+          done
+        });
+
+      if (error) throw error;
+    }
+
+    hideTaskModal();
+    await loadProjectTasks(currentProjectId);
+
+  } catch (error) {
+    console.error('Error saving task:', error);
+    if (window.toast) window.toast.error('Failed to save task: ' + error.message);
+  } finally {
+    saveButton.disabled = false;
+    saveButton.textContent = 'Save';
+  }
+}
+
+async function handleTaskDelete() {
+  if (!deleteTaskId) return;
+  const deleteButton = document.getElementById('task-delete-confirm');
+
+  try {
+    deleteButton.disabled = true;
+    deleteButton.textContent = 'Deleting...';
+
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', deleteTaskId);
+
+    if (error) throw error;
+
+    hideDeleteModal();
+    await loadProjectTasks(currentProjectId);
+
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    if (window.toast) window.toast.error('Failed to delete task: ' + error.message);
+  } finally {
+    deleteButton.disabled = false;
+    deleteButton.textContent = 'Delete';
+  }
+}
+
+function buildDescriptionHtml(text) {
+  const escaped = escapeHtml(text);
+  const withBreaks = escaped.replace(/\n/g, '<br>');
+  return `<p>${withBreaks}</p>`;
+}
+
+function getTaskById(taskId) {
+  return currentTasks.find(task => task.id === taskId);
 }
 
 function escapeHtml(text) {
