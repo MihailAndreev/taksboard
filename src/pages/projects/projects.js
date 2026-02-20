@@ -57,10 +57,18 @@ async function loadProjectsList() {
   const container = document.getElementById('projects-table-container');
   
   try {
-    // Fetch projects owned by the user
+    // Fetch projects with stages and tasks counts
     const { data: projects, error } = await supabase
       .from('projects')
-      .select('id, title, project, description, created_at')
+      .select(`
+        id, 
+        title, 
+        project, 
+        description, 
+        created_at,
+        project_stages(id),
+        tasks(id, done)
+      `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -85,18 +93,31 @@ async function loadProjectsList() {
       <table class="projects-table">
         <thead>
           <tr>
-            <th>Project Name</th>
+            <th>Title</th>
             <th>Description</th>
-            <th>Created</th>
-            <th>Actions</th>
+            <th class="text-center"><span class="nowrap">Stages</span></th>
+            <th class="text-center"><span class="nowrap">Open Tasks</span></th>
+            <th class="text-center"><span class="nowrap">Tasks Done</span></th>
+            <th class="text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
     `;
 
     projects.forEach(project => {
-      const createdDate = new Date(project.created_at).toLocaleDateString();
+      // Truncate description if longer than 80 characters
       const description = project.description || 'No description';
+      const truncatedDescription = description.length > 80 
+        ? description.substring(0, 80) + '...' 
+        : description;
+      
+      // Count stages
+      const stagesCount = project.project_stages?.length || 0;
+      
+      // Count open and done tasks
+      const tasks = project.tasks || [];
+      const openTasks = tasks.filter(task => !task.done).length;
+      const doneTasks = tasks.filter(task => task.done).length;
       
       tableHTML += `
         <tr>
@@ -105,9 +126,19 @@ async function loadProjectsList() {
               ${escapeHtml(project.title)}
             </a>
           </td>
-          <td class="project-description">${escapeHtml(description)}</td>
-          <td class="project-date">${createdDate}</td>
-          <td class="project-actions">
+          <td class="project-description" title="${escapeHtml(description)}">
+            ${escapeHtml(truncatedDescription)}
+          </td>
+          <td class="project-stat text-center">
+            <span class="stat-badge stat-badge-gray">${stagesCount}</span>
+          </td>
+          <td class="project-stat text-center">
+            <span class="stat-badge stat-badge-blue">${openTasks}</span>
+          </td>
+          <td class="project-stat text-center">
+            <span class="stat-badge stat-badge-green">${doneTasks}</span>
+          </td>
+          <td class="project-actions text-center">
             <button class="btn-icon-action btn-view" data-link="/projects/${project.id}/tasks" title="View Tasks">
               <span>📋</span>
             </button>
