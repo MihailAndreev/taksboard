@@ -142,7 +142,7 @@ async function loadProjectsList() {
             <button class="btn-icon-action btn-view" data-link="/projects/${project.id}/tasks" title="View Tasks">
               <span>📋</span>
             </button>
-            <button class="btn-icon-action btn-edit" data-link="/projects/edit/${project.id}" title="Edit">
+            <button class="btn-icon-action btn-edit" data-link="/projects/${project.id}/edit" title="Edit">
               <span>✏️</span>
             </button>
             <button class="btn-icon-action btn-delete" data-project-id="${project.id}" data-project-title="${escapeHtml(project.title)}" title="Delete">

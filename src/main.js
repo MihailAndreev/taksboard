@@ -19,7 +19,7 @@ router.addRoute('/register', () => import('./pages/register/register.js').then(m
 // Project routes
 router.addRoute('/projects', () => import('./pages/projects/projects.js').then(m => m.renderProjects()));
 router.addRoute('/projects/add', () => import('./pages/projects/projects-add.js').then(m => m.renderProjectsAdd()));
-router.addRoute('/projects/edit/:id', (params) => import('./pages/projects/projects-edit.js').then(m => m.renderProjectsEdit(params)));
+router.addRoute('/projects/:id/edit', (params) => import('./pages/projects/projects-edit.js').then(m => m.renderProjectsEdit(params)));
 router.addRoute('/projects/:id/tasks', (params) => import('./pages/projects-id-tasks/projects-id-tasks.js').then(m => m.renderProjectTasks(params)));
 router.addRoute('/projects/:id', (params) => Promise.resolve(`
   <div class="page-container">
