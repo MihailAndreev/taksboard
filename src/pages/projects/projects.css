@@ -26,15 +26,59 @@
   font-size: 2rem;
 }
 
+/* Button Styles */
 .btn-create {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-create:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-create:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .btn-icon {
   font-size: 1.2rem;
   font-weight: bold;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #9df0bf 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .projects-content {
@@ -86,10 +130,16 @@
   color: #2c3e50;
 }
 
-.project-key {
-  font-family: 'Courier New', monospace;
+.project-link {
+  color: #2c3e50;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-weight: 600;
+}
+
+.project-link:hover {
   color: #667eea;
-  font-weight: 500;
+  text-decoration: underline;
 }
 
 .project-description {
@@ -112,36 +162,52 @@
 }
 
 .btn-icon-action {
-  background: transparent;
+  background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 1.1rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .btn-icon-action:hover {
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.btn-view:hover {
-  background-color: #e3f2fd;
+.btn-view {
   border-color: #2196f3;
 }
 
-.btn-edit:hover {
-  background-color: #fff3e0;
+.btn-view:hover {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  border-color: #2196f3;
+  color: white;
+}
+
+.btn-edit {
   border-color: #ff9800;
 }
 
-.btn-delete:hover {
-  background-color: #ffebee;
+.btn-edit:hover {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  border-color: #ff9800;
+  color: white;
+}
+
+.btn-delete {
   border-color: #f44336;
+}
+
+.btn-delete:hover {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  border-color: #f44336;
+  color: white;
 }
 
 /* Empty State */
@@ -243,35 +309,44 @@
 
 .modal-actions button {
   padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  border: none;
+  border-radius: 6px;
+  border: 2px solid transparent;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-secondary {
-  background-color: #ecf0f1;
-  color: #2c3e50;
+  background-color: #f8f9fa;
+  color: #1e293b;
+  border-color: #cbd5e1;
 }
 
 .btn-secondary:hover {
-  background-color: #bdc3c7;
+  background-color: white;
+  border-color: #94a3b8;
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn-danger {
-  background-color: #e74c3c;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: white;
 }
 
 .btn-danger:hover {
-  background-color: #c0392b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
 }
 
 .btn-danger:disabled {
-  background-color: #95a5a6;
+  background: #95a5a6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Responsive Design */

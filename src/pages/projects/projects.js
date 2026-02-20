@@ -86,7 +86,6 @@ async function loadProjectsList() {
         <thead>
           <tr>
             <th>Project Name</th>
-            <th>Key</th>
             <th>Description</th>
             <th>Created</th>
             <th>Actions</th>
@@ -101,8 +100,11 @@ async function loadProjectsList() {
       
       tableHTML += `
         <tr>
-          <td class="project-title">${escapeHtml(project.title)}</td>
-          <td class="project-key">${escapeHtml(project.project)}</td>
+          <td class="project-title">
+            <a href="/projects/${project.id}/tasks" data-link="/projects/${project.id}/tasks" class="project-link">
+              ${escapeHtml(project.title)}
+            </a>
+          </td>
           <td class="project-description">${escapeHtml(description)}</td>
           <td class="project-date">${createdDate}</td>
           <td class="project-actions">
