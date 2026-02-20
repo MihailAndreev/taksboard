@@ -132,6 +132,7 @@ async function loadProjectsList() {
 
   } catch (error) {
     console.error('Error loading projects:', error);
+    if (window.toast) window.toast.error('Error loading projects: ' + error.message);
     container.innerHTML = `
       <div class="error-state">
         <h3>Error loading projects</h3>
@@ -208,15 +209,15 @@ function setupDeleteModal() {
 
       hideDeleteModal();
       
+      // Show success toast
+      if (window.toast) window.toast.success('Project deleted successfully');
+      
       // Reload the projects list
       await loadProjectsList();
-      
-      // Show success message (you can add a toast notification here)
-      console.log('Project deleted successfully');
 
     } catch (error) {
       console.error('Error deleting project:', error);
-      alert('Failed to delete project: ' + error.message);
+      if (window.toast) window.toast.error('Failed to delete project: ' + error.message);
     } finally {
       confirmBtn.disabled = false;
       confirmBtn.textContent = 'Delete';

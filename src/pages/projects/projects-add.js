@@ -127,12 +127,14 @@ function setupForm() {
     // Validate
     if (!title || !project) {
       showError('Please fill in all required fields');
+      if (window.toast) window.toast.error('Please fill in all required fields');
       return;
     }
 
     // Validate project key format
     if (!/^[A-Z0-9-]+$/.test(project)) {
       showError('Project Key must contain only uppercase letters, numbers, and hyphens');
+      if (window.toast) window.toast.error('Project Key must contain only uppercase letters, numbers, and hyphens');
       return;
     }
 
@@ -167,12 +169,16 @@ function setupForm() {
         // Handle unique constraint violation
         if (error.code === '23505') {
           showError('A project with this key already exists. Please choose a different key.');
+          if (window.toast) window.toast.error('A project with this key already exists. Please choose a different key.');
           return;
         }
         throw error;
       }
 
       console.log('Project created:', newProject);
+
+      // Show success toast
+      if (window.toast) window.toast.success('Project created successfully!');
 
       // Redirect to projects list
       if (window.appRouter) {
@@ -181,7 +187,9 @@ function setupForm() {
 
     } catch (error) {
       console.error('Error creating project:', error);
-      showError(error.message || 'Failed to create project. Please try again.');
+      const errorMsg = error.message || 'Failed to create project. Please try again.';
+      showError(errorMsg);
+      if (window.toast) window.toast.error(errorMsg);
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Create Project';

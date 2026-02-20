@@ -134,6 +134,7 @@ async function loadProject(projectId) {
 
   } catch (error) {
     console.error('Error loading project:', error);
+    if (window.toast) window.toast.error('Error loading project: ' + error.message);
     loadingState.style.display = 'none';
     errorState.style.display = 'block';
     errorMessageText.textContent = error.message || 'Failed to load project';
@@ -163,12 +164,14 @@ function setupForm(projectId, originalProject) {
     // Validate
     if (!title || !project) {
       showError('Please fill in all required fields');
+      if (window.toast) window.toast.error('Please fill in all required fields');
       return;
     }
 
     // Validate project key format
     if (!/^[A-Z0-9-]+$/.test(project)) {
       showError('Project Key must contain only uppercase letters, numbers, and hyphens');
+      if (window.toast) window.toast.error('Project Key must contain only uppercase letters, numbers, and hyphens');
       return;
     }
 
@@ -193,12 +196,16 @@ function setupForm(projectId, originalProject) {
         // Handle unique constraint violation
         if (error.code === '23505') {
           showError('A project with this key already exists. Please choose a different key.');
+          if (window.toast) window.toast.error('A project with this key already exists. Please choose a different key.');
           return;
         }
         throw error;
       }
 
       console.log('Project updated:', updatedProject);
+
+      // Show success toast
+      if (window.toast) window.toast.success('Project updated successfully!');
 
       // Redirect to projects list
       if (window.appRouter) {
@@ -207,7 +214,9 @@ function setupForm(projectId, originalProject) {
 
     } catch (error) {
       console.error('Error updating project:', error);
-      showError(error.message || 'Failed to update project. Please try again.');
+      const errorMsg = error.message || 'Failed to update project. Please try again.';
+      showError(errorMsg);
+      if (window.toast) window.toast.error(errorMsg);
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Save Changes';

@@ -52,6 +52,7 @@ export async function renderRegister() {
 
         if (!fullName || !email || !password) {
           setStatus('Please complete all fields to register.', 'error');
+          if (window.toast) window.toast.error('Please complete all fields to register.');
           return;
         }
 
@@ -70,6 +71,7 @@ export async function renderRegister() {
 
         if (error) {
           setStatus(error.message, 'error');
+          if (window.toast) window.toast.error(error.message);
           submitButton.disabled = false;
           submitButton.textContent = 'Register';
           return;
@@ -77,6 +79,7 @@ export async function renderRegister() {
 
         if (data?.session) {
           setStatus('Account created. Redirecting to your dashboard...', 'success');
+          if (window.toast) window.toast.success('Account created successfully!');
           if (window.appRouter) {
             window.appRouter.go('/dashboard');
           }
@@ -84,6 +87,7 @@ export async function renderRegister() {
         }
 
         setStatus('Account created. Please check your email to confirm your account.', 'success');
+        if (window.toast) window.toast.success('Account created! Please check your email to confirm.');
         submitButton.disabled = false;
         submitButton.textContent = 'Register';
       });

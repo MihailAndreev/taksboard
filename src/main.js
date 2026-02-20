@@ -2,6 +2,8 @@ import { Router } from './router.js';
 import { renderHeader } from './components/header/header.js';
 import { renderFooter } from './components/footer/footer.js';
 import { supabase } from './lib/supabaseClient.js';
+import { toast } from './lib/toast.js';
+import './lib/toast.css';
 
 // Initialize router
 const router = new Router();
@@ -28,8 +30,9 @@ router.addRoute('/projects/:id', (params) => Promise.resolve(`
 `));
 router.addRoute('/projects/:id/tasks', (params) => Promise.resolve(`<h1>Tasks for Project ${params.id}</h1>`));
 
-// Expose router globally for navigation
+// Expose router and toast globally for navigation and notifications
 window.appRouter = router;
+window.toast = toast;
 
 // Render static components
 renderFooter();

@@ -47,6 +47,7 @@ export async function renderLogin() {
 
         if (!email || !password) {
           setStatus('Please enter your email and password.', 'error');
+          if (window.toast) window.toast.error('Please enter your email and password.');
           return;
         }
 
@@ -60,6 +61,7 @@ export async function renderLogin() {
 
         if (error) {
           setStatus(error.message, 'error');
+          if (window.toast) window.toast.error(error.message);
           submitButton.disabled = false;
           submitButton.textContent = 'Login';
           return;
