@@ -38,8 +38,20 @@ const initializeApp = async () => {
   const { data } = await supabase.auth.getSession();
   renderHeader(data?.session?.user ?? null);
 
+  // Set supabase instance in router for auth checks
+  router.setSupabase(supabase);
+
   supabase.auth.onAuthStateChange((_event, session) => {
     renderHeader(session?.user ?? null);
+    
+    // Redirect to dashboard if user just logged in and on home page
+    if (session?.user && window.location.pathname === '/') {
+      router.go('/dashboard');
+    }
+    // Redirect to home if user logged out and on protected page
+    if (!session?.user && window.location.pathname === '/dashboard') {
+      router.go('/');
+    }
   });
 
   // Initialize router

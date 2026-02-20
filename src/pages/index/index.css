@@ -50,9 +50,10 @@
 }
 
 .hero-subtitle {
-  max-width: 640px;
+  /* max-width: 640px; */
   margin: 0 auto 1.6rem auto;
   line-height: 1.7;
+  text-align: center;
 }
 
 .hero-note {

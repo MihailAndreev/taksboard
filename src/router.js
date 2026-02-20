@@ -5,6 +5,14 @@ export class Router {
   constructor() {
     this.routes = [];
     this.contentElement = document.getElementById('content');
+    this.supabaseInstance = null;
+  }
+
+  /**
+   * Set Supabase instance for auth checks
+   */
+  setSupabase(supabase) {
+    this.supabaseInstance = supabase;
   }
 
   addRoute(path, handler) {
@@ -62,6 +70,26 @@ export class Router {
     if (!match) {
       this.contentElement.innerHTML = '<h1>404 - Page Not Found</h1>';
       return;
+    }
+
+    // Auth check: redirect logged-in users from home to dashboard
+    if (url === '/' && this.supabaseInstance) {
+      const { data } = await this.supabaseInstance.auth.getSession();
+      if (data?.session?.user) {
+        window.history.replaceState({}, '', '/dashboard');
+        await this.navigate('/dashboard');
+        return;
+      }
+    }
+
+    // Auth check: protect dashboard route
+    if (url === '/dashboard' && this.supabaseInstance) {
+      const { data } = await this.supabaseInstance.auth.getSession();
+      if (!data?.session?.user) {
+        window.history.replaceState({}, '', '/login');
+        await this.navigate('/login');
+        return;
+      }
     }
 
     try {
